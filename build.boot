@@ -6,10 +6,10 @@
   :resource-paths #{"src" "html"}
 
   :dependencies '[[org.clojure/clojure "1.8.0"]
-                  [org.clojure/clojurescript "1.7.228"]
+                  [org.clojure/clojurescript "1.8.51"]
 
                   [adzerk/boot-cljs "1.7.228-1" :scope "test"]       ; CLJS compiler
-                  [adzerk/boot-reload "0.4.4" :scope "test"]         ; live reload
+                  [adzerk/boot-reload "0.4.6" :scope "test"]         ; live reload
                   [adzerk/boot-cljs-repl "0.3.0" :scope "test"]      ; add bREPL
                   [com.cemerick/piggieback "0.2.1" :scope "test"]    ; needed by bREPL 
                   [weasel "0.7.0" :scope "test"]                     ; needed by bREPL
@@ -40,7 +40,8 @@
     (watch)
     (reload)
     (cljs-repl)
-    (cljs) ))
+    (cljs)
+    (target) ))
 
 (deftask build
   "Build and install the JAR file"

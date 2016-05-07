@@ -1,5 +1,5 @@
 (ns example.core
-  (:require [cljs.debux :as d :refer-macros [clog break]]))
+  (:require [debux.cs.core :as d :refer-macros [clog dbg break]]))
 
 (clog (repeat 5 (clog (repeat 5 "x")
                       "inner repeat"))
