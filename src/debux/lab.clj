@@ -1,5 +1,6 @@
 (ns debux.lab
   (:require (clojure [string :as str]
+                     [walk :as walk]
                      [pprint :as pp] )))
 
 ;;; For internal debugging
@@ -13,14 +14,38 @@
      return#))
 
 (defmacro d
-  [form]
-  `(let [form# ~form]
-     (println (:form (meta '~form)) "=>" form#)
-     form#))
+  [x]
+  `(let [x# ~x]
+     (println (:form (meta '~x)) "=>" x#)
+     x#))
 
-(let [a 2
-      b 3
-      c 5]
-  (d ^{:form (* c (+ a b))}
-     (* c (d ^{:form (+ a b)} (+ a b)) )))
+(def a 2)
+(def b 3)
+(def c 5)
 
+;; input (dbgn (* c (+ a b)))
+;; output
+(d ^{:form (* c (+ a b))}
+     (* (d ^{:form c} c)
+        (d ^{:form (+ a b)}
+           (+ (d ^{:form a} a)
+              (d ^{:form b} b) ))))
+
+(defn dispatch
+  [node]
+  ;(dbg_ node)
+  (cond
+    (list? node)
+    (d ^{:form node} node)
+
+    (symbol? node)
+    (d ^{:form node} node)
+
+    :else node
+    ))
+    
+(defn tree-walk
+  [tree]
+  (walk/prewalk #'dispatch tree))
+
+(tree-walk '(* c (+ a b)))

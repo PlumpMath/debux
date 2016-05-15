@@ -186,7 +186,7 @@
         js    (:js opts2)
         style (:style opts2)
         
-        subforms2 (map insert-first subforms (repeat 'name))
+        subforms2 (map insert-last subforms (repeat 'name))
         pairs  (map (fn [fst snd n]
                       `(pp-subform '~fst ~snd ~n ~clog ~js))
                     subforms subforms2 (repeat n))]
@@ -232,7 +232,7 @@
         style (:style opts2)
         
         pairs     (partition 2 bindings)
-        syms      (map (fn [sym] `(pp-subform '~sym ~sym ~n ~clog ~js))
+        syms      (map (fn [sym] `(let [& '&] (pp-subform '~sym ~sym ~n)))
                        (take-nth 2 bindings))
         pps       (map (fn [s e] [s e]) (repeat '_) syms)
         bindings2 (interleave pairs pps)]
