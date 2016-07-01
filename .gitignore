@@ -5,6 +5,7 @@
 
 /example/target
 /example/resources/public/js
+/example/figwheel_server.log
 
 *~
 *#

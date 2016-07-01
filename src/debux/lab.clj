@@ -49,3 +49,5 @@
   (walk/prewalk #'dispatch tree))
 
 (tree-walk '(* c (+ a b)))
+
+
