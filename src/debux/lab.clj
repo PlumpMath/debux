@@ -34,28 +34,37 @@
 
 (def z (zip/seq-zip '(* c (+ a b))))
 
-(defn insert-d0 [loc]
-  (cond
-    (zip/end? loc) (zip/root loc)
-        
-    (list? (zip/node loc))
-    (recur (-> (zip/replace loc `(d ~(zip/node loc)))
-               zip/next zip/next zip/next zip/next))
-
-    :else
-     (recur (zip/next loc))))
-
 (defn insert-d [loc]
   (cond
     (zip/end? loc) (zip/root loc)
         
-    (list? (zip/node loc))
+    (seq? (zip/node loc))
     (recur (-> (zip/replace loc (concat ['d] [(zip/node loc)]))
-               zip/next zip/next zip/next zip/next))
+               zip/down zip/right zip/down zip/right))
 
     :else
      (recur (zip/next loc))))
 
 (insert-d z)
+; => (d (* c (d (+ a b))))
+
+
+(def z2 (zip/seq-zip (insert-d z)))
+
+(defn remove-d [loc]
+  (let [node (zip/node loc)]
+    (cond
+      (zip/end? loc) (zip/root loc)
+        
+      (and (seq? node)
+           (= 'd (first node)))
+      (recur (zip/replace loc (second node)))
+      
+      :else
+      (recur (zip/next loc)) )))
+
+(remove-d z2)
+; => (* c (+ a b))
+
 
 
