@@ -15,12 +15,12 @@
      (println ">> dbg_:" (pr-str '~form) "=>" return# "<<")
      return#))
 
-;; (defmacro d
-;;   [x]
-;;   ;(dbg_ (type x))
-;;   `(let [x# ~x]
-;;      (println (:form (dbg_ (meta '~x))) "=>" x#)
-;;      x#))
+(defmacro d
+  [x]
+  ;(dbg_ (type x))
+  `(let [x# ~x]
+     (println (:form (meta '~x)) "=>" x#)
+     x#))
 
 (def a 2)
 (def b 3)
@@ -34,11 +34,18 @@
            (+ (d ^{:form a} a)
               (d ^{:form b} b) ))))
 
-(defmacro dd []
+(defmacro dd0 []
   (d ~(with-meta (* (d ~(with-meta c {:form c}))
-                    (d ~(with-meta (+ (d ~(with-meta a {:form a}))
-                                      (d ~(with-meta b {:form b})))
-                          {:form (+ a b)}))
+                     (d ~(with-meta (+ (d ~(with-meta a {:form a}))
+                                       (d ~(with-meta b {:form b})))
+                           {:form (+ a b)}))
+                     {:form (* c (+ a b))}))))
+
+(defmacro dd []
+  `(d (with-meta (* (d (with-meta c {:form c}))
+                    (d (with-meta (+ (d (with-meta a {:form a}))
+                                     (d (with-meta b {:form b})))
+                         {:form (+ a b)}))
                     {:form (* c (+ a b))}))))
 ;(dd)
 

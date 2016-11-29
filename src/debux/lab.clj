@@ -1,11 +1,11 @@
 (ns debux.lab
   (:require (clojure [string :as str]
-                     [walk :as walk]
+                     [zip :as zip]
                      [pprint :as pp] )))
 
-;(use 'debux.core)
+(use 'debux.core)
 
-;; ;;; For internal debugging
+;;; For internal debugging
 
 (defmacro ^:private dbg_
   "The internal macro to debug dbg macro.
@@ -15,41 +15,37 @@
      (println ">> dbg_:" (pr-str '~form) "=>" return# "<<")
      return#))
 
-(defmacro d0
-  [x]
-  ;(dbg_ (type x))
+(defmacro d [x f]
   `(let [x# ~x]
-     (println (:form (dbg_ (meta '~x))) "=>" x#)
+     (println ~f "=>" x#)
      x#))
-
-(defmacro d
-  [x]
-  `(let [x# ~(vary-meta x assoc :form '~x)]
-     (println (:form (meta (dbg_ x#))) "=>" x#)
-     x#))
-
-(defmacro dbgn [form]
-  `(d ~(vary-meta form
-                  assoc :form `~form)))
-
-
-;;; For test
 
 (def a 2)
 (def b 3)
 (def c 5)
 
-(d (* c (d (+ a b))))
+;; input (dbgn (* c (+ a b)))
+;; output
+(d (* c (d (+ a b)
+           '(+ a b)))
+   '(* c (+ a b)))
 
-(dbgn (* c (dbgn (+ a b))))
-; >> (* c (+ a b)) => 25
+(defmacro dbgn [form])
 
-(dbgn a)
-; >> a => 2
+(def z (zip/seq-zip '(* c (+ a b))))
+
+(defn insert-d [loc]
+  (cond
+    (zip/end? loc) (zip/root loc)
+        
+    (list? (dbg (zip/node loc) "list?"))
+    (recur (-> (zip/replace loc `(d ~(zip/node loc)))
+               zip/next zip/next zip/next zip/next))
+
+    :else
+    (do (dbg (zip/node loc) "else")
+        (recur (zip/next loc)))))
+
+(insert-d z)
 
 
-(dbgn (let [a 10 b 20] (dbgn (+ a b))))
-; >> (let [a 10 b 20] (+ a b)) => 30
-
-(dbgn a)
-; >> a => 2
