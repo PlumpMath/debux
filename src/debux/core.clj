@@ -198,7 +198,7 @@
         msg   (:msg opts2)
 
         pairs     (partition 2 bindings)
-        syms      (map (fn [sym] `(let [~'& '&] (pp-subform '~sym ~sym ~n)))
+        syms      (map (fn [sym] `(pp-subform '~sym ~sym ~n))
                        (take-nth 2 bindings))
         pps       (map (fn [s e] [s e]) (repeat '_) syms)
         bindings' (interleave pairs pps)]

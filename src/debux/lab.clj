@@ -5,7 +5,8 @@
 
 ;(use 'debux.core)
 
-;; For internal debugging
+;; ;;; For internal debugging
+
 (defmacro ^:private dbg_
   "The internal macro to debug dbg macro.
    <form any> a form to be evaluated"
@@ -14,32 +15,41 @@
      (println ">> dbg_:" (pr-str '~form) "=>" return# "<<")
      return#))
 
+(defmacro d0
+  [x]
+  ;(dbg_ (type x))
+  `(let [x# ~x]
+     (println (:form (dbg_ (meta '~x))) "=>" x#)
+     x#))
+
+(defmacro d
+  [x]
+  `(let [x# ~(vary-meta x assoc :form '~x)]
+     (println (:form (meta (dbg_ x#))) "=>" x#)
+     x#))
+
+(defmacro dbgn [form]
+  `(d ~(vary-meta form
+                  assoc :form `~form)))
+
+
+;;; For test
+
 (def a 2)
 (def b 3)
 (def c 5)
 
-(defn dispatch
-  [node]
-  ;(dbg_ node)
-  (cond
-    (list? node)
-    (do (eval `(dbg_ ~node))
-        node)
+(d (* c (d (+ a b))))
 
-    (and (symbol? node) (not (fn? (eval node))))
-    (do (eval `(dbg_ ~node))
-        node)
+(dbgn (* c (dbgn (+ a b))))
+; >> (* c (+ a b)) => 25
 
-    :else node))
+(dbgn a)
+; >> a => 2
 
-(defn tree-walk
-  [tree]
-  (walk/postwalk dispatch tree))
 
-;(tree-walk '(* c (+ a b)))
+(dbgn (let [a 10 b 20] (dbgn (+ a b))))
+; >> (let [a 10 b 20] (+ a b)) => 30
 
-(defmacro dbgn [form]
-  (tree-walk form))
-
-;; (dbgn (* c (+ a b)))
-;; (dbgn (let [a 10 b 20 c 30] (+ a b c)))
+(dbgn a)
+; >> a => 2
