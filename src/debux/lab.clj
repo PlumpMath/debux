@@ -5,35 +5,6 @@
 
 (use 'debux.core)
 
-;;; For internal debugging
-
-(defmacro ^:private dbg_
-  "The internal macro to debug dbg macro.
-   <form any> a form to be evaluated"
-  [form]
-  `(let [return# ~form]
-     (println ">> dbg_:" (pr-str '~form) "=>" return# "<<")
-     return#))
-
-(defmacro d [x f]
-  `(let [x# ~x]
-     (println ~f "=>" x#)
-     x#))
-
-(def a 2)
-(def b 3)
-(def c 5)
-
-;; input (dbgn (* c (+ a b)))
-;; output
-(d (* c (d (+ a b)
-           '(+ a b)))
-   '(* c (+ a b)))
-
-(defmacro dbgn [form])
-
-(def z (zip/seq-zip '(* c (+ a b))))
-
 (defn insert-d [loc]
   (cond
     (zip/end? loc) (zip/root loc)
@@ -44,12 +15,6 @@
 
     :else
      (recur (zip/next loc))))
-
-(insert-d z)
-; => (d (* c (d (+ a b))))
-
-
-(def z2 (zip/seq-zip (insert-d z)))
 
 (defn remove-d [loc]
   (let [node (zip/node loc)]
@@ -63,8 +28,60 @@
       :else
       (recur (zip/next loc)) )))
 
+(defmacro d [form]
+  `(let [return# ~form
+         print# '~(remove-d (zip/seq-zip form))]
+     (println print# "=>" return#)
+     return#))
+
+(defmacro dbgn [form]
+  (insert-d (zip/seq-zip form)))
+
+
+(comment
+
+(def z (zip/seq-zip '(* c (+ a b))))
+(insert-d z)
+; => (d (* c (d (+ a b))))
+
+(def z2 (zip/seq-zip (insert-d z)))
 (remove-d z2)
 ; => (* c (+ a b))
 
+(d (* c (+ a b)))
+; >> (* c (+ a b)) => 25
+; => 25
 
+(dbgn (* c (+ a b)))
+; >> (+ a b) => 5
+; >> (* c (+ a b)) => 25
+; => 25
 
+(dbgn (let [grade 85]
+        (cond
+          (>= grade 90) "A"
+          (>= grade 80) "B"
+          (>= grade 70) "C"
+          (>= grade 60) "D"
+          :else "F")))
+; >> (>= grade 90) => false
+;    (>= grade 80) => true
+;    (cond (>= grade 90) A (>= grade 80) B (>= grade 70) C (>= grade 60) D :else F) => B
+;    (let [grade 85] (cond (>= grade 90) A (>= grade 80) B (>= grade 70) C (>= grade 60) D :else F)) => B
+; => B
+
+(dbgn (defn pos-neg-or-zero
+  "Determines whether or not n is positive, negative, or zero"
+  [n]
+  (cond
+    (< n 0) "negative"
+    (> n 0) "positive"
+    :else "zero")))
+
+(pos-neg-or-zero 10)
+; >> (< n 0) => false
+;    (> n 0) => true
+;    (cond (< n 0) negative (> n 0) positive :else zero) => positive
+; => "positive"
+
+) ; end of comment
