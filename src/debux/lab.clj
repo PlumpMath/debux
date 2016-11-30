@@ -40,6 +40,10 @@
 
 (comment
 
+(def a 2)
+(def b 3)
+(def c 5)
+
 (def z (zip/seq-zip '(* c (+ a b))))
 (insert-d z)
 ; => (d (* c (d (+ a b))))
